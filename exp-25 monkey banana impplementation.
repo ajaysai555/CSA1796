@@ -1,0 +1,66 @@
+state(at(monkey, middle, middle), has(nothing), at(box, bottom, middle), at(banana, top, middle)).
+
+action(walk(middle, middle, left)).
+action(walk(middle, middle, right)).
+action(walk(middle, left, left)).
+action(walk(middle, right, right)).
+action(walk(middle, middle, middle)).
+
+
+action(climb_box).
+action(push_box).
+
+can(do(Action), State) :-
+    state(State),
+    action(Action),
+    apply(Action, State).
+
+apply(walk(From, To, Dir), state(at(monkey, From, Y), H, B, C)) :-
+    Y \= bottom,
+    Dir = up,
+    To = top,
+    H = nothing,
+    B = B,
+    C = C.
+
+apply(walk(From, To, Dir), state(at(monkey, From, Y), H, B, C)) :-
+    Y \= top,
+    Dir = down,
+    To = bottom,
+    H = nothing,
+    B = B,
+    C = C.
+
+apply(walk(From, To, Dir), state(at(monkey, X, From), H, B, C)) :-
+    X \= left,
+    Dir = left,
+    To = left,
+    H = nothing,
+    B = B,
+    C = C.
+
+apply(walk(From, To, Dir), state(at(monkey, X, From), H, B, C)) :-
+    X \= right,
+    Dir = right,
+    To = right,
+    H = nothing,
+    B = B,
+    C = C.
+
+apply(climb_box, state(at(monkey, X, Y), H, at(box, X, Y), C)) :-
+    H = nothing,
+    C = C.
+
+apply(push_box, state(at(monkey, X, Y), H, at(X, NewY, Y), C)) :-
+    H = nothing,
+    Y \= bottom,
+    NewY \= bottom,
+    C = C.
+
+goal_state(state(at(monkey, _, top), has(banana), _, _)).
+
+plan(State, []) :- goal_state(State).
+plan(State1, [Action | PlanRest]) :-
+    can(do(Action), State1),
+    apply(Action, State1, State2),
+    plan(State2, PlanRest).
